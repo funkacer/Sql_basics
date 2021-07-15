@@ -1,0 +1,1 @@
+select a._id, a.date, b._id, b.date from forecast as a inner join forecast1 as b on a._id = b._id where a.date <> b.date

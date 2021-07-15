@@ -1,0 +1,6 @@
+*.lnk
+/__pycache__/
+/.pytest_cache/
+/.ipynb_checkpoints/
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*

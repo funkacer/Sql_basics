@@ -1,0 +1,1 @@
+SELECT * INTO [dbMOJE].[dbo].[aaa] FROM [dbMOJE].[dbo].[20200118_condition];

@@ -1,0 +1,1 @@
+select distinct text, temperature from Weather_db_20200118.condition group by temperature having count(text) > 1 
