@@ -1,0 +1,1 @@
+SELECT [index], _id FROM "20200118_condition"
