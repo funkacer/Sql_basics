@@ -1,7 +1,6 @@
 import os
 import argparse
 import sqlite3
-import traceback
 
 def parseArgv():
 
@@ -21,6 +20,21 @@ def parseArgv():
     parser.set_defaults(interactive='')
 
     return parser.parse_args()
+
+def format_matrix(header, matrix,
+                  top_format, left_format, cell_format, row_delim, col_delim):
+    table = [[''] + header] + [[name] + row for name, row in zip(header, matrix)]
+    table_format = [['{:^{}}'] + len(header) * [top_format]] \
+                 + len(matrix) * [[left_format] + len(header) * [cell_format]]
+    col_widths = [max(
+                      len(format.format(cell, 0))
+                      for format, cell in zip(col_format, col))
+                  for col_format, col in zip(zip(*table_format), zip(*table))]
+    return row_delim.join(
+               col_delim.join(
+                   format.format(cell, width)
+                   for format, cell, width in zip(row_format, row, col_widths))
+               for row_format, row in zip(table_format, table))
 
 def get_sql_queries_dict(lst):
     sqls = {}
@@ -44,26 +58,6 @@ def get_sql_queries_dict(lst):
 
     return sqls
 
-def do_sql(conn, sql):
-
-    try:
-        c = conn.cursor()
-        c.execute('''{}'''.format(sql))
-        data = c.fetchall()
-        if data:
-            columns = [col[0] for col in c.description]
-            row_format = "{:>15}" * (len(columns) + 1)
-            print(row_format.format("", *columns))
-            for i, row in enumerate(data):
-                #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
-                print(row_format.format(str(i), *[str(r) for r in row]))    # Null to None
-        print()
-        conn.commit()
-        #conn.close()
-
-    except Exception as e:
-        traceback.print_exc()
-
 def main():
 
     namespace = parseArgv()
@@ -75,26 +69,38 @@ def main():
     assert len(vars(namespace)['database']) == 1, 'Database_filename error'
     database_filename = vars(namespace)['database'][0]
     print('\n' + 'Database:', database_filename, '\n')
-    conn = sqlite3.connect(database_filename)
 
     if len(vars(namespace)['sql_files']) > 0:
         sqls = get_sql_queries_dict(vars(namespace)['sql_files'])
         #print(sqls, '\n')
-
+        conn = sqlite3.connect(database_filename)
+        c = conn.cursor()
         for sqlf in sqls.keys():
             for i, sql in enumerate(sqls[sqlf]):
                 print('SQL file {} query no {}:'.format(sqlf, str(i+1)))
                 print(sql, '\n')
-                do_sql(conn, sql)
+                c.execute('''{}'''.format(sql))
+                data = c.fetchall()
+                if data:
+                    columns = [col[0] for col in c.description]
+                    #print(data, '\n')
+                    #print(list(list(a) for a in zip(*data)))
+                    #print (format_matrix(columns, list(list(a) for a in zip(*data)), '{:^{}}', '{:<{}}', '{:>{}.3f}', '\n', ' | '))
+                    #print (format_matrix(columns, list(list(a) for a in zip(*data)), '{:^{}}', '{:<{}}', '{:>{}}', '\n', ' | '))
+                    for row in data:
+                        for col in row:
+                            #print(len(str(col)))
+                            #TODO:pretty print
+                            pass
+                    row_format = "{:>15}" * (len(columns) + 1)
+                    print(row_format.format("", *columns))
+                    for i, row in enumerate(data):
+                        #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
+                        print(row_format.format(str(i), *[str(r) for r in row]))    # Null to None
+                    print()
 
     if len(vars(namespace)['sql_files']) == 0 and isinstance(vars(namespace)['interactive'], str) or vars(namespace)['interactive']:
-        print("Entering interactive mode. Type 'quit' to quit.", '\n')
-        sql = input('Sql: ')
-        while sql.lower().strip() != 'quit':
-            do_sql(conn, sql)
-            sql = input('Sql: ')
-
-    conn.close()
+        print('Entering interactive mode')
 
 if __name__ == '__main__':
     main()
