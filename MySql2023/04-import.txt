@@ -1,0 +1,41 @@
+SPUSTIT MAMP!!!
+
+//windowssaci
+//otevrou terminal
+//pokud maji powershell tak musi prenout terminial na cmd
+//pomoci sipky vedle pluska v pravem rohu temrinalu
+
+//nejprve se musime dostat doslozky bin
+//W
+cd C:/xampp/mysql/bin
+//M
+cd /Applications/MAMP/Library/bin
+
+//W
+mysql
+//M
+./mysql
+//obe by mela vyskocit hlaska access denied
+
+//ted ten import
+
+//W nemaji heslo
+mysql -u root pocasi < C:\xampp\htdocs\tonda\2022-12-06\teploty.sql
+
+//M musi pouzit heslo
+./mysql -u root -proot pocasi < /Applications/MAMP/htdocs/jirka/2022-12-06/teploty.sql
+
+Import Sakila:
+cd /Applications/MAMP/Library/bin
+./mysql -u root -proot
+mysql> SOURCE C:/temp/sakila-db/sakila-schema.sql;
+mysql> SOURCE C:/temp/sakila-db/sakila-data.sql;
+
+(https://dev.mysql.com/doc/sakila/en/sakila-installation.html)
+
+Import Parch_and_posey:
+cd /Applications/MAMP/Library/bin
+./mysql -u root -proot
+create database parch_and_posey;
+use parch_and_posey;
+SOURCE /Users/cerny/_Git/_venv/Sql_basics/MySql2023/parch-and-posey/parch-and-posey_mysql.sql;
